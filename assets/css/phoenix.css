@@ -1,0 +1,61 @@
+/* Includes Bootstrap as well as some default style for the starter
+ * application. This can be safely deleted to start fresh.
+ */
+
+/* Space out content a bit */
+body, form, ul, table {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Phoenix flash messages */
+.alert:empty { display: none; }
+
+/* Custom page header */
+.header {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+.container-narrow > hr {
+  margin: 30px 0;
+}
+
+.cell {
+  background: #FAFAFA;
+  padding: 1em;
+  margin: 1em 0 1em 0;
+}
+
+.input-cell .hljs {
+  background: #FAFAFA;
+}
+
+.output-cell .hljs {
+  background: #fff;
+  padding: 10px;
+  margin: 0 -0.25em -0.25em -0.25em;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+  /* Remove the padding we set earlier */
+  .header,
+  .marketing {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  /* Space out the masthead */
+  .header {
+    margin-bottom: 30px;
+  }
+  /* Remove the bottom border on the jumbotron for visual effect */
+  .jumbotron {
+    border-bottom: 0;
+  }
+}
