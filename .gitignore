@@ -27,4 +27,7 @@ npm-debug.log
 /config/*.secret.exs
 
 # ignore elm package artifacts
-assets/elm/elm-stuff/
+/assets/elm/elm-stuff/
+
+# this should be built by elm at compile time
+/assets/priv/static/
