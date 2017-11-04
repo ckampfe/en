@@ -35,7 +35,10 @@ defmodule En.Plot do
     }
   end
   def series(data, options) when is_list(data) do
-    datapoints = Enum.chunk_every(data, 2) |> Enum.map(&to_datapoint/1)
+    datapoints =
+      data
+      |> Enum.chunk_every(2)
+      |> Enum.map(&to_datapoint/1)
 
     %__MODULE__{
       data: datapoints,

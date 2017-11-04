@@ -31,3 +31,6 @@ npm-debug.log
 
 # this should be built by elm at compile time
 /assets/priv/static/
+
+# this should be built by elm at compile time
+/assets/elm/static/vendor/

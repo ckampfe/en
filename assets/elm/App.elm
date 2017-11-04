@@ -2,7 +2,7 @@ module App exposing (..)
 
 import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
-import EnPlot as EnPlot exposing (Plot, Point, decodePlot)
+import EnPlot as EnPlot exposing (Plot, Point, plotDecoder)
 import Highlight exposing (highlight)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, type_, value)
@@ -205,7 +205,7 @@ render data =
             rawHtml data.content
 
         Plot ->
-            case JD.decodeString decodePlot data.content of
+            case JD.decodeString plotDecoder data.content of
                 Ok plot ->
                     EnPlot.series plot
 
@@ -311,6 +311,7 @@ renderableDecoder =
 renderableKindDecoder : JD.Decoder RenderableKind
 renderableKindDecoder =
     JD.map decodeRenderableKind JD.string
+
 
 
 decodeRenderableKind : String -> RenderableKind

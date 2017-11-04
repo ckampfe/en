@@ -42,16 +42,16 @@ series plot =
 -------------------
 
 
-decodePlot : JD.Decoder Plot
-decodePlot =
+plotDecoder : JD.Decoder Plot
+plotDecoder =
     JD.map3 Plot
         (field "x_axis_label" JD.string)
         (field "y_axis_label" JD.string)
-        (field "data" (JD.list decodePoint))
+        (field "data" (JD.list pointDecoder))
 
 
-decodePoint : JD.Decoder Point
-decodePoint =
+pointDecoder : JD.Decoder Point
+pointDecoder =
     JD.map2 Point
         (field "x" JD.float)
         (field "y" JD.float)
