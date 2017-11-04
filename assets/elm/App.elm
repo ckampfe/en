@@ -2,6 +2,7 @@ module App exposing (..)
 
 import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
+import EnPlot as EnPlot exposing (Plot, Point, decodePlot)
 import Highlight exposing (highlight)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, type_, value)
@@ -19,14 +20,9 @@ import Task
 import Time exposing (Time, now)
 
 
-main : Program Never Model Msg
-main =
-    Html.program
-        { init = init
-        , update = update
-        , view = view
-        , subscriptions = subscriptions
-        }
+---------------------
+-- type defintions --
+---------------------
 
 
 type alias Model =
@@ -65,7 +61,24 @@ type alias Renderable =
 type RenderableKind
     = Text
     | HTML
+    | Plot
     | KindError String
+
+
+
+---------------
+-- functions --
+---------------
+
+
+main : Program Never Model Msg
+main =
+    Html.program
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
 
 
 init : ( Model, Cmd Msg )
@@ -169,41 +182,15 @@ update msg model =
             ( model, highlight () )
 
 
-userParams : JE.Value
-userParams =
-    JE.object [ ( "user_id", JE.string "123" ) ]
-
-
-chatMessageDecoder : JD.Decoder ChatMessage
-chatMessageDecoder =
-    JD.map2 ChatMessage
-        (field "user" JD.string)
-        (field "body" renderableDecoder)
-
-
-renderableDecoder : JD.Decoder Renderable
-renderableDecoder =
-    JD.map2 Renderable
-        (field "kind" renderableKindDecoder)
-        (field "content" JD.string)
-
-
-renderableKindDecoder : JD.Decoder RenderableKind
-renderableKindDecoder =
-    JD.map decodeRenderableKind JD.string
-
-
-decodeRenderableKind : String -> RenderableKind
-decodeRenderableKind string =
-    case toLower string of
-        "text" ->
-            Text
-
-        "html" ->
-            HTML
-
-        _ ->
-            KindError ("cannot parse kind " ++ string)
+view : Model -> Html Msg
+view model =
+    Grid.container []
+        [ CDN.stylesheet
+        , div []
+            [ drawCellsList model.inputCells model.outputCells
+            , inputStateForm model
+            ]
+        ]
 
 
 render : Renderable -> Html Msg
@@ -217,19 +204,24 @@ render data =
             -- HTML injects the string into the dom as raw HTML
             rawHtml data.content
 
+        Plot ->
+            case JD.decodeString decodePlot data.content of
+                Ok plot ->
+                    EnPlot.series plot
+
+                Err error ->
+                    div []
+                        [ div [] [ text "Invalid data returned. This should never happen. Please file a bug." ]
+                        , br [] []
+                        , div [] [ text "Args:" ]
+                        , div [] [ text data.content ]
+                        , br [] []
+                        , div [] [ text "Error:" ]
+                        , div [] [ text error ]
+                        ]
+
         KindError err ->
             div [] [ text err ]
-
-
-view : Model -> Html Msg
-view model =
-    Grid.container []
-        [ CDN.stylesheet
-        , div []
-            [ drawCellsList model.inputCells model.outputCells
-            , inputStateForm model
-            ]
-        ]
 
 
 inputStateForm : Model -> Html Msg
@@ -283,3 +275,55 @@ codeBlock a lang =
         [ code [ attribute "class" lang ]
             [ text a ]
         ]
+
+
+
+-------------------
+-- JSON encoders --
+-------------------
+
+
+userParams : JE.Value
+userParams =
+    JE.object [ ( "user_id", JE.string "123" ) ]
+
+
+
+-------------------
+-- JSON decoders --
+-------------------
+
+
+chatMessageDecoder : JD.Decoder ChatMessage
+chatMessageDecoder =
+    JD.map2 ChatMessage
+        (field "user" JD.string)
+        (field "body" renderableDecoder)
+
+
+renderableDecoder : JD.Decoder Renderable
+renderableDecoder =
+    JD.map2 Renderable
+        (field "kind" renderableKindDecoder)
+        (field "content" JD.string)
+
+
+renderableKindDecoder : JD.Decoder RenderableKind
+renderableKindDecoder =
+    JD.map decodeRenderableKind JD.string
+
+
+decodeRenderableKind : String -> RenderableKind
+decodeRenderableKind string =
+    case toLower string of
+        "text" ->
+            Text
+
+        "html" ->
+            HTML
+
+        "plot" ->
+            Plot
+
+        _ ->
+            KindError ("cannot parse kind " ++ string)
