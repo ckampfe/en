@@ -36,8 +36,7 @@ type alias Model =
 
 
 type alias ChatMessage =
-    { user : String
-    , body : Renderable
+    { body : Renderable
     }
 
 
@@ -122,7 +121,7 @@ update msg model =
         SendMessage ->
             let
                 payload =
-                    JE.object [ ( "user", JE.string "user" ), ( "body", JE.string model.inputState ) ]
+                    JE.object [ ( "body", JE.string model.inputState ) ]
 
                 push_ =
                     Phoenix.Push.init "new:msg" "room:lobby"
@@ -285,7 +284,7 @@ codeBlock a lang =
 
 userParams : JE.Value
 userParams =
-    JE.object [ ( "user_id", JE.string "123" ) ]
+    JE.string "ok"
 
 
 
@@ -296,8 +295,7 @@ userParams =
 
 chatMessageDecoder : JD.Decoder ChatMessage
 chatMessageDecoder =
-    JD.map2 ChatMessage
-        (field "user" JD.string)
+    JD.map ChatMessage
         (field "body" renderableDecoder)
 
 

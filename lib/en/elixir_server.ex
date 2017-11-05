@@ -37,13 +37,13 @@ defmodule En.ElixirServer do
             env
           )
 
-        {{result, bindings}, new_env}
+        {result, bindings, new_env}
       rescue
          e -> e
       end
 
     case reply do
-      {{result, new_bindings}, new_env} ->
+      {result, new_bindings, new_env} ->
         {:reply, {result, new_bindings}, {new_bindings, new_env}}
       _error ->
         {:reply, reply, {bindings, env}}

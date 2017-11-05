@@ -6,7 +6,7 @@ defmodule EnWeb.RoomChannel do
     {:ok, socket}
   end
 
-  def handle_in("new:msg", %{"body" => body, "user" => user}, socket) do
+  def handle_in("new:msg", %{"body" => body}, socket) do
     result =
       case En.ElixirServer.call(body, __ENV__) do
         {result, binding}  ->
@@ -21,7 +21,7 @@ defmodule EnWeb.RoomChannel do
           "#{description} line: #{line}"
       end
 
-    broadcast!(socket, "new:msg", %{body: Renderable.render(result), user: user})
+    broadcast!(socket, "new:msg", %{body: Renderable.render(result)})
     {:noreply, socket}
   end
 end
