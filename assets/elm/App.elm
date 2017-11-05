@@ -313,7 +313,6 @@ renderableKindDecoder =
     JD.map decodeRenderableKind JD.string
 
 
-
 decodeRenderableKind : String -> RenderableKind
 decodeRenderableKind string =
     case toLower string of
