@@ -4,8 +4,11 @@ defmodule En.Plot do
   defstruct [data: [],
              x_axis_label: "",
              y_axis_label: "",
+             series_type: :line,
+             point_type: :circle,
              debug: false
              ]
+
   def to_datapoint([x, y]) do
     %{x: x,
       y: y}
@@ -17,22 +20,12 @@ defmodule En.Plot do
 
   def series(datapoints, options \\ [debug: false])
   def series([%{x: _x, y: _y} | _] = datapoints, options) do
-    %__MODULE__{
-      data: datapoints,
-      x_axis_label: Keyword.get(options, :x_axis_label, ""),
-      y_axis_label: Keyword.get(options, :y_axis_label, ""),
-      debug: Keyword.get(options, :debug, false)
-    }
+    new_series(datapoints, options)
   end
   def series([%{"x" => _x, "y" => _y} | _] = data, options) do
     datapoints = Enum.map(data, &to_datapoint/1)
 
-    %__MODULE__{
-      data: datapoints,
-      x_axis_label: Keyword.get(options, :x_axis_label, ""),
-      y_axis_label: Keyword.get(options, :y_axis_label, ""),
-      debug: Keyword.get(options, :debug, false)
-    }
+    new_series(datapoints, options)
   end
   def series(data, options) when is_list(data) do
     datapoints =
@@ -40,11 +33,17 @@ defmodule En.Plot do
       |> Enum.chunk_every(2)
       |> Enum.map(&to_datapoint/1)
 
+    new_series(datapoints, options)
+  end
+
+  def new_series(datapoints, options) do
     %__MODULE__{
       data: datapoints,
       x_axis_label: Keyword.get(options, :x_axis_label, ""),
       y_axis_label: Keyword.get(options, :y_axis_label, ""),
-      debug: Keyword.get(options, :debug, false)
+      series_type:  Keyword.get(options, :series_type, :line),
+      point_type:   Keyword.get(options, :point_type, :circle),
+      debug:        Keyword.get(options, :debug, false)
     }
   end
 
