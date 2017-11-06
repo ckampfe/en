@@ -4,6 +4,7 @@ import Json.Decode as JD exposing (field)
 import Plot exposing (..)
 import String exposing (toLower)
 import Svg exposing (Svg)
+import Svg.Attributes exposing (stroke)
 
 
 ---------------------
@@ -39,6 +40,9 @@ type alias Plot =
     , data : List Point
     , series_type : SeriesType
     , point_type : PointType
+    , interpolation : ( Maybe String, String ) -> Plot.Interpolation
+    , area_color : Maybe String
+    , stroke_color : String
     }
 
 
@@ -57,20 +61,20 @@ series plot =
                     \{ x, y } -> clear x y
 
                 Square ->
-                    \{ x, y } -> square x y
+                    \{ x, y } -> dot (viewSquare 10 plot.stroke_color) x y
 
                 Circle ->
-                    \{ x, y } -> circle x y
+                    \{ x, y } -> dot (viewCircle 5 plot.stroke_color) x y
 
                 Diamond ->
-                    \{ x, y } -> diamond x y
+                    \{ x, y } -> dot (viewDiamond 10 10 plot.stroke_color) x y
 
                 Triangle ->
-                    \{ x, y } -> triangle x y
+                    \{ x, y } -> dot (viewTriangle plot.stroke_color) x y
 
                 _ ->
                     -- default to circle
-                    \{ x, y } -> circle x y
+                    \{ x, y } -> dot (viewCircle 5 plot.stroke_color) x y
 
         seriesType =
             case plot.series_type of
@@ -86,10 +90,39 @@ series plot =
                 _ ->
                     -- default to line
                     line (List.map pointType)
+
+        series seriesType =
+            { axis = normalAxis
+            , interpolation = plot.interpolation ( plot.area_color, plot.stroke_color )
+            , toDataPoints = seriesType
+            }
     in
-    viewSeries
-        [ seriesType ]
-        plot.data
+    viewSeries [ series (List.map pointType) ] plot.data
+
+
+translateToMaybeColor : String -> Maybe String
+translateToMaybeColor str =
+    case toLower str of
+        "none" ->
+            Nothing
+
+        "pink" ->
+            Just pink
+
+        "lightblue" ->
+            Just lightBlue
+
+        "lightgreen" ->
+            Just lightGreen
+
+        "green" ->
+            Just green
+
+        "yellow" ->
+            Just yellow
+
+        anythingElse ->
+            Just anythingElse
 
 
 
@@ -100,12 +133,15 @@ series plot =
 
 plotDecoder : JD.Decoder Plot
 plotDecoder =
-    JD.map5 Plot
+    JD.map8 Plot
         (field "x_axis_label" JD.string)
         (field "y_axis_label" JD.string)
         (field "data" (JD.list pointDecoder))
         (field "series_type" seriesTypeDecoder)
         (field "point_type" pointTypeDecoder)
+        (field "interpolation" interpolationDecoder)
+        (field "area_color" (JD.map translateToMaybeColor JD.string))
+        (field "stroke_color" JD.string)
 
 
 pointDecoder : JD.Decoder Point
@@ -161,3 +197,56 @@ decodePointType pointType =
 
         _ ->
             UnknownPoint
+
+
+interpolationDecoder : JD.Decoder (( Maybe String, String ) -> Plot.Interpolation)
+interpolationDecoder =
+    JD.map decodeInterpolation JD.string
+
+
+decodeInterpolation : String -> ( Maybe String, String ) -> Plot.Interpolation
+decodeInterpolation interpolation =
+    case toLower interpolation of
+        "none" ->
+            \( areaColor, strokeColor ) -> None
+
+        "linear" ->
+            \( areaColor, strokeColor ) -> Linear areaColor [ stroke strokeColor ]
+
+        "monotone" ->
+            \( areaColor, strokeColor ) -> Monotone areaColor [ stroke strokeColor ]
+
+        _ ->
+            -- default to linear
+            \( areaColor, strokeColor ) -> Linear areaColor [ stroke strokeColor ]
+
+
+
+------------
+-- colors --
+------------
+
+
+pink : String
+pink =
+    "#ff9edf"
+
+
+lightBlue : String
+lightBlue =
+    "#85c1e9"
+
+
+lightGreen : String
+lightGreen =
+    "#7dcea0"
+
+
+green : String
+green =
+    "#229954"
+
+
+yellow : String
+yellow =
+    "#f7dc6f"

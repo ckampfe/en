@@ -6,6 +6,9 @@ defmodule En.Plot do
              y_axis_label: "",
              series_type: :line,
              point_type: :circle,
+             interpolation: :linear,
+             area_color: :none,
+             stroke_color: "#ff9edf",
              debug: false
              ]
 
@@ -39,11 +42,14 @@ defmodule En.Plot do
   def new_series(datapoints, options) do
     %__MODULE__{
       data: datapoints,
-      x_axis_label: Keyword.get(options, :x_axis_label, ""),
-      y_axis_label: Keyword.get(options, :y_axis_label, ""),
-      series_type:  Keyword.get(options, :series_type, :line),
-      point_type:   Keyword.get(options, :point_type, :circle),
-      debug:        Keyword.get(options, :debug, false)
+      x_axis_label:  Keyword.get(options, :x_axis_label, ""),
+      y_axis_label:  Keyword.get(options, :y_axis_label, ""),
+      series_type:   Keyword.get(options, :series_type, :line),
+      point_type:    Keyword.get(options, :point_type, :circle),
+      interpolation: Keyword.get(options, :interpolation, :linear),
+      area_color:    Keyword.get(options, :area_color, :none),
+      stroke_color:  Keyword.get(options, :stroke_color, "#ff9edf"),
+      debug:         Keyword.get(options, :debug, false)
     }
   end
 
